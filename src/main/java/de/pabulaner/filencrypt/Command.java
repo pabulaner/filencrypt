@@ -3,6 +3,7 @@ package de.pabulaner.filencrypt;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.Options;
@@ -22,6 +23,8 @@ public class Command {
 
     private final Option password;
 
+    private final Options options;
+
     private final CommandLine cmd;
 
     public Command(String[] args) throws ParseException {
@@ -40,13 +43,21 @@ public class Command {
         group.setRequired(true);
 
         CommandLineParser parser = new DefaultParser();
-        Options options = new Options()
+
+        options = new Options()
                 .addOptionGroup(group)
                 .addOption(input)
                 .addOption(output)
                 .addOption(password);
 
-        cmd = parser.parse(options, args);
+        try {
+            cmd = parser.parse(options, args);
+        } catch (ParseException e) {
+            HelpFormatter help = new HelpFormatter();
+            help.printHelp("filencrypt", options);
+
+            throw e;
+        }
     }
 
     public Mode getMode() {
@@ -67,6 +78,10 @@ public class Command {
 
     public Path getOutput() {
         return Path.of(cmd.getOptionValue(output));
+    }
+
+    public Options getOptions() {
+        return options;
     }
 
     public String getPassword() {

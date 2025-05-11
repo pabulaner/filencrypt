@@ -1,14 +1,19 @@
 package de.pabulaner.filencrypt;
 
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.ParseException;
+
 import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class App {
 
     public static void main(String[] args) {
-        Command command = exec(() -> new Command(args), "Invalid arguments");
+        Command command;
 
-        if (command == null) {
+        try {
+            command = new Command(args);
+        } catch (ParseException e) {
             return;
         }
 
