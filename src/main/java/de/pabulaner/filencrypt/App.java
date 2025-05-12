@@ -23,13 +23,13 @@ public class App {
         }
 
         Secure secure = new Secure(command.getPassword());
-        String input = exec(() -> Files.readString(command.getInput()), "Failed to read input file");
+        byte[] input = exec(() -> Files.readAllBytes(command.getInput()), "Failed to read input file");
 
         if (input == null) {
             return;
         }
 
-        String output = switch (command.getMode()) {
+        byte[] output = switch (command.getMode()) {
             case ENCRYPT -> exec(() -> secure.encrypt(input), "Failed to encrypt file");
             case DECRYPT -> exec(() -> secure.decrypt(input), "Failed to decrypt file");
         };
@@ -38,7 +38,7 @@ public class App {
             return;
         }
 
-        Path result = exec(() -> Files.writeString(command.getOutput(), output), "Failed to write output file");
+        Path result = exec(() -> Files.write(command.getOutput(), output), "Failed to write output file");
 
         if (result == null) {
             return;

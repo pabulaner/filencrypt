@@ -38,7 +38,7 @@ public class Secure {
         }
     }
 
-    public String encrypt(String input) throws Exception {
+    public byte[] encrypt(byte[] input) throws Exception {
         SecureRandom random = new SecureRandom();
         byte[] iv = new byte[IV_LENGTH];
 
@@ -50,22 +50,21 @@ public class Secure {
 
         cipher.init(Cipher.ENCRYPT_MODE, key, spec);
 
-        byte[] encrypted = cipher.doFinal(input.getBytes());
+        byte[] encrypted = cipher.doFinal(input);
         byte[] combined = new byte[iv.length + encrypted.length];
 
         System.arraycopy(iv, 0, combined, 0, iv.length);
         System.arraycopy(encrypted, 0, combined, iv.length, encrypted.length);
 
-        return Base64.getEncoder().encodeToString(combined);
+        return combined;
     }
 
-    public String decrypt(String input) throws Exception {
-        byte[] combined = Base64.getDecoder().decode(input);
+    public byte[] decrypt(byte[] input) throws Exception {
         byte[] iv = new byte[IV_LENGTH];
-        byte[] encrypted = new byte[combined.length - iv.length];
+        byte[] encrypted = new byte[input.length - iv.length];
 
-        System.arraycopy(combined, 0, iv, 0, iv.length);
-        System.arraycopy(combined, iv.length, encrypted, 0, encrypted.length);
+        System.arraycopy(input, 0, iv, 0, iv.length);
+        System.arraycopy(input, iv.length, encrypted, 0, encrypted.length);
 
         SecretKey key = createKey();
         Cipher cipher = Cipher.getInstance(TRANSFORMATION);
@@ -73,8 +72,7 @@ public class Secure {
 
         cipher.init(Cipher.DECRYPT_MODE, key, spec);
 
-        byte[] result = cipher.doFinal(encrypted);
-        return new String(result);
+        return cipher.doFinal(encrypted);
     }
 
     private SecretKeySpec createKey() throws NoSuchAlgorithmException {
